@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContex";
-import { loginStyles } from "../theme/loginTheme";
+import { appStyles } from "../theme/theme";
 import { Background } from "../componentes/Background";
 import { WhiteLogo } from "../componentes/WhiteLogo"; 
 import { StackScreenProps } from "@react-navigation/stack";
@@ -79,21 +79,21 @@ export const LoginScreen = ({ navigation }: Props) => {
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <View style={loginStyles.formContainer}>
+        <View style={appStyles.formContainer}>
           {/* Keyboard avoid view */}
           <WhiteLogo />
 
-          <Text style={loginStyles.title}>Login</Text>
+          <Text style={appStyles.title}>Login</Text>
 
-          <Text style={loginStyles.label}>Email:</Text>
+          <Text style={appStyles.label}>Email:</Text>
           <TextInput
             placeholder="Ingrese su email:"
             placeholderTextColor="rgba(255,255,255,0.4)"
             keyboardType="email-address"
             underlineColorAndroid="white"
             style={[
-              loginStyles.inputField,
-              Platform.OS === "ios" && loginStyles.inputFieldIOS
+              appStyles.inputField,
+              Platform.OS === "ios" && appStyles.inputFieldIOS
             ]}
             selectionColor="white"
             onChangeText={(value) => setUsername(value.toLowerCase())}
@@ -103,15 +103,15 @@ export const LoginScreen = ({ navigation }: Props) => {
             autoCorrect={false}
           />
 
-          <Text style={loginStyles.label}>Contraseña:</Text>
+          <Text style={appStyles.label}>Contraseña:</Text>
           <TextInput
             placeholder="******"
             placeholderTextColor="rgba(255,255,255,0.4)"
             underlineColorAndroid="white"
             secureTextEntry
             style={[
-              loginStyles.inputField,
-              Platform.OS === "ios" && loginStyles.inputFieldIOS
+              appStyles.inputField,
+              Platform.OS === "ios" && appStyles.inputFieldIOS
             ]}
             selectionColor="white"
             onChangeText={(value) => setPassword(value)}
@@ -121,7 +121,7 @@ export const LoginScreen = ({ navigation }: Props) => {
             autoCorrect={false}
           />
           <TouchableOpacity
-            style={loginStyles.rememberContainer}
+            style={appStyles.rememberContainer}
             onPress={() => setRememberMe(!rememberMe)}
           >
             <FontAwesomeIcon
@@ -130,17 +130,17 @@ export const LoginScreen = ({ navigation }: Props) => {
               color="white"
               style={{ marginRight: 10 }}
             />
-            <Text style={loginStyles.rememberText}>Recordar credenciales</Text>
+            <Text style={appStyles.rememberText}>Recordar credenciales</Text>
           </TouchableOpacity>
 
           {/* Boton login */}
-          <View style={loginStyles.buttonContainer}>
+          <View style={appStyles.buttonContainer}>
             <TouchableOpacity
               activeOpacity={0.8}
-              style={loginStyles.button}
+              style={appStyles.button}
               onPress={onLogin}
             >
-              <Text style={loginStyles.buttonText}>Login</Text>
+              <Text style={appStyles.buttonText}>Login</Text>
             </TouchableOpacity>
           </View>
         </View>

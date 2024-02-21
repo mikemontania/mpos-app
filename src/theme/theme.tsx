@@ -2,7 +2,11 @@ import { StyleSheet } from "react-native";
 
 
 
-export const loginStyles = StyleSheet.create({
+export const appStyles = StyleSheet.create({
+    container: {
+        flex: 1,
+        padding: 10
+      },
     formContainer: {
         flex: 1,
         paddingHorizontal: 30,
@@ -73,4 +77,66 @@ export const loginStyles = StyleSheet.create({
         height: 20,
         tintColor: 'white',
       },
+      menuContainer: {
+        marginVertical: 30,
+        marginHorizontal: 50,
+    },
+    avatarContainer: {
+        alignItems: 'center',
+        marginTop: 20
+    },
+    avatar: {
+        width: 150,
+        height: 150,
+        borderRadius: 100
+    },
+    menuBoton: {
+        marginVertical: 10
+    },
+    avatarTexto: {
+        fontSize: 9,
+        color:'#04B3FF',
+        fontWeight: 'bold',
+    },
+    menuTexto: {
+        fontSize: 16,
+        color:'#04B3FF',
+        fontWeight: 'bold',
+    },
+    card: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        backgroundColor: "#04B3FF",
+        borderRadius: 8,
+        shadowColor: "#000",
+        shadowOpacity: 0.2,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 4,
+        padding: 16,
+        marginBottom: 16
+      }, 
+        list: {
+    flex: 1,
+    paddingTop: 16
+  },
+      name: {
+        fontSize: 18,
+        fontWeight: "bold",
+        marginBottom: 4
+      },
+      description: {
+        fontSize: 14,
+        color: "#666",
+        marginBottom: 4
+      },
+      amount: {
+        flexDirection: "row",
+        alignItems: "center"
+      }
+
+
+
+    
+    
 });

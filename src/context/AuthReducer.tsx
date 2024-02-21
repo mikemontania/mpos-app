@@ -63,6 +63,7 @@ export const authReducer = ( state: AuthState, action: AuthAction ): AuthState =
 const getUser = (token: string) => {
     try {
         const decodedToken = decode(token.split('.')[1]);
+        console.log(decodedToken)
         return JSON.parse(decodedToken);
     } catch (error) {
         console.error('Error decoding token:', error);

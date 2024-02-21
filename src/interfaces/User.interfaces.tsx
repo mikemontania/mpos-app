@@ -4,6 +4,8 @@ export interface Usuario {
     codEmpresa:       number;
     codSucursal:      number;
     codEmpresaErp:    string;
+    codPersonaErp:    string;
+    sub:    string;
     codSucursalErp:   string;
     nombre:           string;
     username:         string;
