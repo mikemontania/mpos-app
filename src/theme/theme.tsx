@@ -133,9 +133,22 @@ export const appStyles = StyleSheet.create({
       amount: {
         flexDirection: "row",
         alignItems: "center"
-      }
-
-
+      },
+      blackButton: {
+        height: 45,
+        width: 200,
+        backgroundColor: 'black',
+        borderRadius: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 3
+        },
+        shadowOpacity: 0.27,
+        elevation: 6
+    }, 
 
     
     

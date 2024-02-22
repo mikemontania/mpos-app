@@ -15,10 +15,10 @@ export interface Marcador {
   title: string;
   description: string;
   entregado: boolean;
-  nroComprobante:string;
+  ubicacionActual: boolean;
+  nroComprobante: string;
   importe: number;
 }
-
 
 export const DetalleRepartoScreen: React.FC = () => {
   const route = useRoute();
@@ -56,19 +56,29 @@ export const DetalleRepartoScreen: React.FC = () => {
           importe: documento.venta.importeTotal,
           title: documento.cliente.razonSocial || "",
           description: documento.cliente.direccion || "",
-          entregado: documento.entregado
+          entregado: documento.entregado,
+          ubicacionActual:false
         }));
 
-        // Actualiza los marcadores y detiene la carga
-        setMarkers(nuevosMarcadores);
-        setIsLoading(false);
-
+        // Agregar tu ubicación actual como marcador adicional
         Geolocation.getCurrentPosition((info) => {
-          setCurrentLocation({
-            latitude: info.coords.latitude,
-            longitude: info.coords.longitude
-          });
+          const ubicacionActual = {
+            coordinate: {
+              latitude: info.coords.latitude,
+              longitude: info.coords.longitude
+            },
+            title: "Ubicación Actual",
+            description: "Tu ubicación actual",
+            entregado: true, // Puedes ajustar esto según tus necesidades
+            ubicacionActual:true
+          };
+
+          // Agregar la ubicación actual a la lista de marcadores
+          setMarkers([...nuevosMarcadores, ubicacionActual]);
         });
+
+        // Detener la carga después de actualizar los marcadores
+        setIsLoading(false);
       }
     } catch (error: any) {
       console.error("Error al realizar la consulta:", error.message);
@@ -83,7 +93,11 @@ export const DetalleRepartoScreen: React.FC = () => {
       {isLoading ? (
         <Text>Cargando...</Text>
       ) : (
-        <MapWithMarkers repartoModel={repartoModel} currentLocation={currentLocation} getData={getData} markers={markers} />
+        <MapWithMarkers
+          repartoModel={repartoModel} 
+          getData={getData}
+          markers={markers}
+        />
       )}
     </View>
   );
