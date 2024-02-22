@@ -6,33 +6,11 @@ import { Marcador } from "../screens/DetalleRepartoScreen";
 import { Reparto } from "../interfaces/Reparto.interfaces";
 import * as Animatable from "react-native-animatable";
 import {
-  faSync,
-  faTimes,
-  faCircle,
-  faCheckCircle
+  faSync 
 } from "@fortawesome/free-solid-svg-icons";
+import { CustomCallout } from "./CustomCallout";
 
-interface CustomCalloutProps {
-  children?: React.ReactNode;
-  onClose: () => void;
-}
-export const CustomCallout: React.FC<CustomCalloutProps> = ({
-  children,
-  onClose
-}) => {
-  const handleClose = () => {
-    onClose();
-  };
 
-  return (
-    <BaseCallout>
-      <View>
-        {children}
-         
-      </View>
-    </BaseCallout>
-  );
-};
 
 interface MapWithMarkersProps {
   repartoModel?: Reparto; 
