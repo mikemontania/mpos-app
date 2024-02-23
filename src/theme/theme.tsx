@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 
+export const THEME_COLOR = '#04B3FF';
 
 
 export const appStyles = StyleSheet.create({
@@ -95,19 +96,19 @@ export const appStyles = StyleSheet.create({
     },
     avatarTexto: {
         fontSize: 9,
-        color:'#04B3FF',
+        color:THEME_COLOR,
         fontWeight: 'bold',
     },
     menuTexto: {
         fontSize: 16,
-        color:'#04B3FF',
+        color:THEME_COLOR,
         fontWeight: 'bold',
     },
     card: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        backgroundColor: "#04B3FF",
+        backgroundColor:THEME_COLOR,
         borderRadius: 8,
         shadowColor: "#000",
         shadowOpacity: 0.2,
@@ -153,3 +154,4 @@ export const appStyles = StyleSheet.create({
     
     
 });
+

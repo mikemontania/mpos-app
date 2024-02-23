@@ -1,31 +1,29 @@
 import React, { useEffect, useRef, useState } from "react";
-import MapView, { Marker, Callout as BaseCallout } from "react-native-maps";
-import { View, Text, TouchableOpacity } from "react-native";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import MapView, { Marker, Callout as BaseCallout } from "react-native-maps"; 
 import { Marcador } from "../screens/DetalleRepartoScreen";
-import { Reparto } from "../interfaces/Reparto.interfaces";
-import * as Animatable from "react-native-animatable";
-import {
-  faSync 
-} from "@fortawesome/free-solid-svg-icons";
+import { Reparto } from "../interfaces/Reparto.interfaces"; 
 import { CustomCallout } from "./CustomCallout";
-
-
+import { FloatingDetailsButton } from "./FloatingDetailsButton";
+import { MarkerModalDetails } from "./MarkerModalDetalis";
+import { faSync } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { TouchableOpacity } from "react-native";
 
 interface MapWithMarkersProps {
-  repartoModel?: Reparto; 
+  repartoModel?: Reparto;
   markers: Marcador[];
   getData: () => void; // Agrega el prop para el método getData
 }
 
- 
 export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
-  repartoModel, 
+  repartoModel,
   getData,
   markers
 }) => {
   const [markerColors, setMarkerColors] = useState<string[]>([]);
   const [selectedMarker, setSelectedMarker] = useState<number | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedMarkerData, setSelectedMarkerData] = useState<Marcador | null>(null);
   const mapViewRef = useRef<MapView>(null);
 
   useEffect(() => {
@@ -37,11 +35,7 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
     // Actualiza los colores de los marcadores cuando cambia la propiedad entregado en los markers
     setMarkerColors(
       markers.map((marker) =>
-        marker.entregado
-          ? marker.ubicacionActual
-            ? "blue"
-            : "green"
-          : "red"
+        marker.entregado ? (marker.ubicacionActual ? "blue" : "green") : "red"
       )
     );
   }, [markers]);
@@ -84,11 +78,20 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
 
   const handleCalloutClose = () => {
     setSelectedMarker(null);
+    setIsModalVisible(false);
   };
 
   const handleMarkerPress = (index: number) => {
     setSelectedMarker(index);
   };
+
+ 
+  const handleDetailsPress = (index: number) => {
+    setSelectedMarker(index);
+    setSelectedMarkerData(markers[index]);
+    setIsModalVisible(true);
+  };
+
   return (
     <>
       <MapView
@@ -111,54 +114,22 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
             onPress={() => handleMarkerPress(index)}
           />
         ))}
-       
       </MapView>
 
-      {selectedMarker !== null && markers[selectedMarker].title !== "Ubicación Actual" && (
-        <Animatable.View
-          animation="slideInDown"
-          duration={500}
-          style={{
-            position: "absolute",
-            top: 5,
-            padding: 10,
-            flexDirection: "column",
-            left: 10,
-            borderRadius: 30,
-            transform: [{ translateX: -50 }],
-            justifyContent: "center",
-            alignItems: "flex-start"
-          }}
-        >
-          <Text style={{ color: "green", fontSize: 9 }}>
-            {markers[selectedMarker].title}
-          </Text>
-          <TouchableOpacity
-            onPress={() => console.log("Botón 1 presionado")}
-            style={{
-              margin: 5,
-              backgroundColor: "white",
-              borderRadius: 30,
-              padding: 10
-            }}
-          >
-            <Text style={{ color: "green", fontSize: 9 }}>Detalles</Text>
-          </TouchableOpacity>
+      {selectedMarker !== null &&
+        markers[selectedMarker].ubicacionActual !== true && (
+          // Utiliza el nuevo componente para manejar los detalles del marcador
+          <FloatingDetailsButton
+            title={markers[selectedMarker].title}
+            onPressDetails={() => handleDetailsPress(selectedMarker)}
+          />
+        )}
 
-          <TouchableOpacity
-            onPress={() => console.log("Botón 2 presionado")}
-            style={{
-              margin: 5,
-              backgroundColor: "white",
-              borderRadius: 30,
-              padding: 10
-            }}
-          >
-            <Text style={{ color: "blue", fontSize: 9 }}>Editar Cliente</Text>
-          </TouchableOpacity>
-        </Animatable.View>
-      )}
-
+      {/*Modal Detalles */}
+      <MarkerModalDetails
+        isVisible={isModalVisible}
+        onClose={handleCalloutClose}
+        markerData={selectedMarkerData} />
       <TouchableOpacity
         style={{
           position: "absolute",

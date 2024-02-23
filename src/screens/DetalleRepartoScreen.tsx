@@ -18,6 +18,7 @@ export interface Marcador {
   ubicacionActual: boolean;
   nroComprobante: string;
   importe: number;
+  codVenta: number;
 }
 
 export const DetalleRepartoScreen: React.FC = () => {
@@ -52,6 +53,7 @@ export const DetalleRepartoScreen: React.FC = () => {
             latitude: documento.cliente.latitud || 0,
             longitude: documento.cliente.longitud || 0
           },
+          codVenta:documento.venta.codVenta,
           nroComprobante: documento.venta.nroComprobante,
           importe: documento.venta.importeTotal,
           title: documento.cliente.razonSocial || "",
