@@ -19,16 +19,19 @@ import {
   VentaDetalle
 } from "../interfaces/Venta.interfaces";
 import { ImageLoader } from "./ImagenLoader";
-
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 interface MarkerModalDetailsProps {
   isVisible: boolean;
   onClose: () => void;
+  update: () => void;
   markerData: Marcador | null;
 }
 
 export const MarkerModalDetails: React.FC<MarkerModalDetailsProps> = ({
   isVisible,
   onClose,
+  update,
   markerData
 }) => {
   const [venta, setVenta] = useState({} as Venta);
@@ -60,6 +63,21 @@ export const MarkerModalDetails: React.FC<MarkerModalDetailsProps> = ({
     }
   };
 
+  const entregar = async () => {
+    if (markerData) {
+      try {
+        const { data } = await apiAxios.put(
+          `/repartos/entregar?id=${markerData.codRepartoDoc}`
+        );
+
+        update();
+        onClose();
+      } catch (error: any) {
+        console.error("Error al realizar la consulta:", error.message);
+      }
+    }
+  };
+
   return (
     <Modal
       animationType="slide"
@@ -77,6 +95,16 @@ export const MarkerModalDetails: React.FC<MarkerModalDetailsProps> = ({
                 <View style={{ padding: 10 }}>
                   {/* Header Section */}
                   <View style={modalStyles.headerContainer}>
+                    <TouchableOpacity
+                      style={modalStyles.closeButtonHeader}
+                      onPress={onClose}
+                    >
+                      <FontAwesomeIcon
+                        icon={faTimes}
+                        size={30}
+                        color={THEME_COLOR}
+                      />
+                    </TouchableOpacity>
                     <Text style={modalStyles.headerText}>
                       Cliente: {venta.cliente?.razonSocial}
                     </Text>
@@ -88,7 +116,7 @@ export const MarkerModalDetails: React.FC<MarkerModalDetailsProps> = ({
                       Numero Comprobante: {venta?.nroComprobante}
                     </Text>
                     <Text style={modalStyles.secondaryTitle}>
-                    Importe: {venta?.importeTotal?.toLocaleString()} Gs.
+                      Importe: {venta?.importeTotal?.toLocaleString()} Gs.
                     </Text>
                   </View>
 
@@ -134,10 +162,12 @@ export const MarkerModalDetails: React.FC<MarkerModalDetailsProps> = ({
                           Medio de Pago: {cobranzaDetalle.medioPago.descripcion}
                         </Text>
                         <Text style={modalStyles.cobranzaDetailsTitle}>
-                          Abonado: {cobranzaDetalle.importeAbonado?.toLocaleString()} Gs.
+                          Abonado:{" "}
+                          {cobranzaDetalle.importeAbonado?.toLocaleString()} Gs.
                         </Text>
                         <Text style={modalStyles.cobranzaDetailsText}>
-                          Cobrado: {cobranzaDetalle.importeCobrado?.toLocaleString()} Gs.
+                          Cobrado:{" "}
+                          {cobranzaDetalle.importeCobrado?.toLocaleString()} Gs.
                         </Text>
                         <Text style={modalStyles.cobranzaDetailsText}>
                           Saldo: {cobranzaDetalle.saldo?.toLocaleString()} Gs.
@@ -147,20 +177,31 @@ export const MarkerModalDetails: React.FC<MarkerModalDetailsProps> = ({
                   )}
 
                   {/* Close Button */}
-                  <View style={{ flex: 1, flexDirection: "row" }}>
+
+                  {!markerData.entregado && (
                     <TouchableOpacity
-                      style={modalStyles.closeButton}
+                      style={{
+                        ...modalStyles.buttonStyle,
+                        margin: 10,
+                        flex: 1
+                      }}
+                      onPress={entregar}
+                    >
+                      <Text style={modalStyles.buttonText}>entregar</Text>
+                    </TouchableOpacity>
+                  )}
+                  {markerData.entregado && (
+                    <TouchableOpacity
+                      style={{
+                        ...modalStyles.buttonStyle,
+                        margin: 10,
+                        flex: 1
+                      }}
                       onPress={onClose}
                     >
-                      <Text style={modalStyles.closeButtonLabel}>Cerrar</Text>
+                      <Text style={modalStyles.buttonText}>cerrar</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                      style={modalStyles.closeButton}
-                      onPress={onClose}
-                    >
-                      <Text style={modalStyles.closeButtonLabel}>Cerrar</Text>
-                    </TouchableOpacity>
-                  </View>
+                  )}
                 </View>
               </ScrollView>
             )}
@@ -186,8 +227,9 @@ export const modalStyles = StyleSheet.create({
   },
 
   headerText: {
-    fontSize: 15,
+    fontSize: 12,
     fontWeight: "bold",
+    marginTop: 15,
     marginBottom: 10,
     color: THEME_COLOR
   },
@@ -209,6 +251,21 @@ export const modalStyles = StyleSheet.create({
     fontWeight: "bold",
     color: THEME_COLOR // Puedes dejar este color como está o ajustarlo según tus preferencias
   },
+  buttonStyle: {
+    flex: 1,
+    height: 45,
+    backgroundColor: THEME_COLOR,
+    borderRadius: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3
+    },
+    shadowOpacity: 0.27,
+    elevation: 6
+  },
   closeButton: {
     ...appStyles.blackButton,
     backgroundColor: THEME_COLOR,
@@ -219,7 +276,12 @@ export const modalStyles = StyleSheet.create({
     height: 50,
     borderRadius: 8
   },
-
+  closeButtonHeader: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    zIndex: 1
+  },
   regularText: {
     color: "white", // Establece el color del texto como blanco
     fontSize: 10
@@ -252,5 +314,9 @@ export const modalStyles = StyleSheet.create({
     borderRadius: 8,
     borderColor: THEME_COLOR,
     borderWidth: 2
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 18
   }
 });

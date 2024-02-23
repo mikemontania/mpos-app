@@ -1,13 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
-import MapView, { Marker, Callout as BaseCallout } from "react-native-maps"; 
+import MapView, { Marker, Callout as BaseCallout } from "react-native-maps";
 import { Marcador } from "../screens/DetalleRepartoScreen";
-import { Reparto } from "../interfaces/Reparto.interfaces"; 
+import { Reparto } from "../interfaces/Reparto.interfaces";
 import { CustomCallout } from "./CustomCallout";
 import { FloatingDetailsButton } from "./FloatingDetailsButton";
 import { MarkerModalDetails } from "./MarkerModalDetalis";
 import { faSync } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { TouchableOpacity } from "react-native";
+import { THEME_COLOR } from "../theme/theme";
+import { MarkerModalEdit } from "./MarkerModalEdit";
 
 interface MapWithMarkersProps {
   repartoModel?: Reparto;
@@ -23,7 +25,10 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
   const [markerColors, setMarkerColors] = useState<string[]>([]);
   const [selectedMarker, setSelectedMarker] = useState<number | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedMarkerData, setSelectedMarkerData] = useState<Marcador | null>(null);
+  const [isModalVisibleEdit, setIsModalVisibleEdit] = useState(false);
+  const [selectedMarkerData, setSelectedMarkerData] = useState<Marcador | null>(
+    null
+  );
   const mapViewRef = useRef<MapView>(null);
 
   useEffect(() => {
@@ -80,18 +85,28 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
     setSelectedMarker(null);
     setIsModalVisible(false);
   };
+  const handleEditClose = () => {
+    setSelectedMarker(null);
+    setIsModalVisibleEdit(false);
+  };
 
+  
   const handleMarkerPress = (index: number) => {
     setSelectedMarker(index);
   };
 
- 
   const handleDetailsPress = (index: number) => {
     setSelectedMarker(index);
     setSelectedMarkerData(markers[index]);
     setIsModalVisible(true);
   };
 
+
+  const handleEditPress = (index: number) => {
+    setSelectedMarker(index);
+    setSelectedMarkerData(markers[index]);
+    setIsModalVisibleEdit(true);
+  };
   return (
     <>
       <MapView
@@ -122,6 +137,7 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
           <FloatingDetailsButton
             title={markers[selectedMarker].title}
             onPressDetails={() => handleDetailsPress(selectedMarker)}
+            onPressEdit={() => handleEditPress(selectedMarker)}
           />
         )}
 
@@ -129,7 +145,16 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
       <MarkerModalDetails
         isVisible={isModalVisible}
         onClose={handleCalloutClose}
-        markerData={selectedMarkerData} />
+        update={getData}
+        markerData={selectedMarkerData}
+      />
+      {/*Modal Edit */}
+      <MarkerModalEdit
+        isVisible={isModalVisibleEdit}
+        onClose={handleEditClose}
+        update={getData}
+        markerData={selectedMarkerData}
+      />
       <TouchableOpacity
         style={{
           position: "absolute",
@@ -141,7 +166,7 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
         }}
         onPress={getData}
       >
-        <FontAwesomeIcon icon={faSync} size={20} color="green" />
+        <FontAwesomeIcon icon={faSync} size={20} color={THEME_COLOR} />
       </TouchableOpacity>
 
       <CustomCallout onClose={handleCalloutClose} />

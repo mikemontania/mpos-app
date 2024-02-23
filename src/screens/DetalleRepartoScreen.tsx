@@ -14,11 +14,15 @@ export interface Marcador {
   coordinate: { latitude: number; longitude: number };
   title: string;
   description: string;
+  direccion: string;
+  telefono: string;
   entregado: boolean;
   ubicacionActual: boolean;
   nroComprobante: string;
   importe: number;
   codVenta: number;
+  codCliente: number;
+  codRepartoDoc: number;
 }
 
 export const DetalleRepartoScreen: React.FC = () => {
@@ -58,7 +62,11 @@ export const DetalleRepartoScreen: React.FC = () => {
           importe: documento.venta.importeTotal,
           title: documento.cliente.razonSocial || "",
           description: documento.cliente.direccion || "",
+          codCliente:documento.cliente.codCliente,
+          direccion:documento.cliente.direccion,
+          telefono:documento.cliente.telefono,
           entregado: documento.entregado,
+          codRepartoDoc:documento.codRepartoDocs,
           ubicacionActual:false
         }));
 
