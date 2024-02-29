@@ -1,6 +1,11 @@
 import { Producto, Unidad, Venta, Cliente } from "./Venta.interfaces";
 
- 
+export interface RepartoPendiente {
+    codReparto: number;
+    documentos: number;
+    fechaReparto: string;
+    finalizado: boolean;
+}
 export interface Reparto {
     codReparto:          number;
     codEmpresa:          number;

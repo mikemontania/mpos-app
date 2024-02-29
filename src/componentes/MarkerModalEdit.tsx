@@ -15,15 +15,20 @@ import {
 import { THEME_COLOR, appStyles } from "../theme/theme";
 import apiAxios from "../api/axios";
 import { Marcador } from "../screens/DetalleRepartoScreen";
-import { faTimes, faKeyboard } from "@fortawesome/free-solid-svg-icons";
+import {
+  faTimes,
+  faKeyboard,
+  faMapMarkerAlt,
+  faPhone
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import MapView, { Marker } from "react-native-maps"; 
+import MapView, { Marker } from "react-native-maps";
 
 interface MarkerModalEditProps {
   isVisible: boolean;
   onClose: () => void;
   update: () => void;
-  markerData: Marcador | null;
+  markerData: Marcador;
 }
 
 export const MarkerModalEdit: React.FC<MarkerModalEditProps> = ({
@@ -32,31 +37,35 @@ export const MarkerModalEdit: React.FC<MarkerModalEditProps> = ({
   update,
   markerData
 }) => {
- 
   const [loading, setLoading] = useState(false);
   const [direccion, setDireccion] = useState("");
   const [telefono, setTelefono] = useState("");
-  const [markerLocation, setMarkerLocation] = useState(markerData?.coordinate || { latitude: 0, longitude: 0 });
+  const [markerLocation, setMarkerLocation] = useState({
+    latitude: 0,
+    longitude: 0
+  });
 
   useEffect(() => {
     setLoading(markerData ? false : true);
     setDireccion(markerData?.direccion || "");
     setTelefono(markerData?.telefono || "");
-    setMarkerLocation(markerData?.coordinate || { latitude: 0, longitude: 0 });
+    setMarkerLocation({
+      latitude: markerData.latitud,
+      longitude: markerData.longitud
+    });
   }, [markerData]);
 
   const guardar = async () => {
     if (markerData) {
       try {
-        const updatedMarkerData = {
-          ...markerData,
+        console.log(markerData);
+        const { data } = await apiAxios.put(`/repartos/cliente`, {
+          codCliente: +markerData.codCliente,
           direccion: direccion,
           telefono: telefono,
-          coordinate: markerLocation
-        };
-
-        // Enviar updatedMarkerData al servidor para actualizar la información
-
+          latitud: markerLocation.latitude,
+          longitud: markerLocation.longitude
+        });
         update();
         onClose();
       } catch (error: any) {
@@ -72,11 +81,7 @@ export const MarkerModalEdit: React.FC<MarkerModalEditProps> = ({
       visible={isVisible}
       onRequestClose={onClose}
     >
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior="padding"
-        enabled
-      >
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" enabled>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={modalStyles.container}>
             {loading ? (
@@ -84,7 +89,7 @@ export const MarkerModalEdit: React.FC<MarkerModalEditProps> = ({
             ) : (
               <>
                 {markerData !== null && (
-                  <View style={{ flex:1, padding: 10 }}>
+                  <View style={{ flex: 1, padding: 10 }}>
                     {/* Header Section */}
                     <View style={modalStyles.headerContainer}>
                       <TouchableOpacity
@@ -98,55 +103,75 @@ export const MarkerModalEdit: React.FC<MarkerModalEditProps> = ({
                         />
                       </TouchableOpacity>
                       <Text style={modalStyles.headerText}>
-                        Cliente: {markerData?.title}
+                        Cliente: {markerData?.razonSocial} -{" "}
+                        {markerData?.docNro}
                       </Text>
 
                       {/* Inputs para dirección y teléfono */}
-                      <TextInput
-                        style={modalStyles.input}
-                        placeholder="Dirección"
-                        value={direccion}
-                        onChangeText={(text) => setDireccion(text)}
-                      />
-                      <TextInput
-                        style={modalStyles.input}
-                        placeholder="Teléfono"
-                        value={telefono}
-                        onChangeText={(text) => setTelefono(text)}
-                      />
+                      <View style={modalStyles.inputContainer}>
+                      <FontAwesomeIcon style={{margin:5}}
+                          icon={faMapMarkerAlt}
+                          size={20}
+                          color={THEME_COLOR}
+                        />
+                        <TextInput
+                          style={modalStyles.inputEd}
+                          placeholder="Dirección"
+                          value={direccion}
+                          onChangeText={(text) => setDireccion(text)}
+                        />
+                      
+                      </View>
+
+                      <View style={modalStyles.inputContainer}>
+                      
+                        <FontAwesomeIcon style={{margin:5}}
+                          icon={faPhone}
+                          size={20}
+                          color={THEME_COLOR}
+                        />
+                          <TextInput
+                          style={modalStyles.inputEd}
+                          placeholder="Teléfono"
+                          value={telefono}
+                          onChangeText={(text) => setTelefono(text)}
+                        />
+                      </View>
                     </View>
                     {/* Mapa para modificar cliente */}
-               <View style={{flex:1}}>
+                    <View style={{ flex: 1 }}>
+                      <MapView
+                        style={modalStyles.map}
+                        initialRegion={{
+                          latitude: markerLocation.latitude,
+                          longitude: markerLocation.longitude,
+                          latitudeDelta: 0.01,
+                          longitudeDelta: 0.01
+                        }}
+                        onPress={(event) =>
+                          setMarkerLocation(event.nativeEvent.coordinate)
+                        }
+                      >
+                        <Marker
+                          coordinate={markerLocation}
+                          draggable
+                          onDragEnd={(event) =>
+                            setMarkerLocation(event.nativeEvent.coordinate)
+                          }
+                        />
+                      </MapView>
 
-                    <MapView
-                      style={modalStyles.map}
-                      initialRegion={{
-                        latitude: markerLocation.latitude,
-                        longitude: markerLocation.longitude,
-                        latitudeDelta: 0.01,
-                        longitudeDelta: 0.01
-                      }}
-                      onPress={(event) => setMarkerLocation(event.nativeEvent.coordinate)}
-                    >
-                      <Marker
-                        coordinate={markerLocation}
-                        draggable
-                        onDragEnd={(event) => setMarkerLocation(event.nativeEvent.coordinate)}
-                      />
-                    </MapView>
-
-                    {/* Botón flotante para cerrar el teclado */}
-                  
-               </View>
+                      {/* Botón flotante para cerrar el teclado */}
+                    </View>
 
                     {/* Botón de guardar */}
                     <TouchableOpacity
                       style={{
-                        ...modalStyles.buttonStyle, 
+                        ...modalStyles.buttonStyle
                       }}
                       onPress={guardar}
                     >
-                      <Text style={modalStyles.buttonText}>Guardar</Text>
+                      <Text style={modalStyles.buttonText}>Actualizar</Text>
                     </TouchableOpacity>
                   </View>
                 )}
@@ -183,10 +208,26 @@ export const modalStyles = StyleSheet.create({
   input: {
     height: 40,
     borderColor: THEME_COLOR,
-    color:THEME_COLOR,
+    color: THEME_COLOR,
     borderWidth: 1,
-    fontSize:9,
+    fontSize: 9,
     marginBottom: 10,
+    paddingLeft: 10,
+    borderRadius: 8
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10
+  },
+  inputEd: {
+    flex: 1, // Para que ocupe todo el espacio disponible
+    height: 40, // O ajusta la altura según sea necesario
+    borderColor: THEME_COLOR,
+    color: THEME_COLOR,
+    borderWidth: 1,
+    fontSize: 9,
     paddingLeft: 10,
     borderRadius: 8
   },
@@ -206,10 +247,10 @@ export const modalStyles = StyleSheet.create({
     borderColor: THEME_COLOR
   },
   closeButtonHeader: {
-    position: 'absolute',
+    position: "absolute",
     top: 10,
     right: 10,
-    zIndex: 1,
+    zIndex: 1
   },
   buttonStyle: {
     height: 45,

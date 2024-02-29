@@ -12,13 +12,11 @@ import { THEME_COLOR } from "../theme/theme";
 import { MarkerModalEdit } from "./MarkerModalEdit";
 
 interface MapWithMarkersProps {
-  repartoModel?: Reparto;
   markers: Marcador[];
   getData: () => void; // Agrega el prop para el método getData
 }
 
 export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
-  repartoModel,
   getData,
   markers
 }) => {
@@ -52,10 +50,10 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
     let minLon = 180;
 
     markers.forEach((marker) => {
-      maxLat = Math.max(maxLat, marker.coordinate.latitude);
-      minLat = Math.min(minLat, marker.coordinate.latitude);
-      maxLon = Math.max(maxLon, marker.coordinate.longitude);
-      minLon = Math.min(minLon, marker.coordinate.longitude);
+      maxLat = Math.max(maxLat, marker.latitud);
+      minLat = Math.min(minLat, marker.latitud);
+      maxLon = Math.max(maxLon, marker.longitud);
+      minLon = Math.min(minLon, marker.longitud);
     });
 
     const midLat = (maxLat + minLat) / 2;
@@ -71,7 +69,10 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
     };
 
     if (markers.length > 0 && mapViewRef.current) {
-      const coordinates = markers.map((marker) => marker.coordinate);
+      const coordinates = markers.map((marker) => ({
+        latitude: marker.latitud,
+        longitude: marker.longitud
+      }));
       const edgePadding = { top: 70, right: 70, bottom: 70, left: 70 };
       mapViewRef.current.fitToCoordinates(coordinates, {
         edgePadding,
@@ -90,7 +91,6 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
     setIsModalVisibleEdit(false);
   };
 
-  
   const handleMarkerPress = (index: number) => {
     setSelectedMarker(index);
   };
@@ -100,7 +100,6 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
     setSelectedMarkerData(markers[index]);
     setIsModalVisible(true);
   };
-
 
   const handleEditPress = (index: number) => {
     setSelectedMarker(index);
@@ -122,9 +121,13 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
         {markers.map((marker, index) => (
           <Marker
             key={index}
-            coordinate={marker.coordinate}
-            title={marker.title}
-            description={marker.description}
+            coordinate={{
+              latitude: marker.latitud,
+              longitude: marker.longitud
+            }}
+            title={marker.razonSocial + " - " + marker.docNro}
+            description={ marker.direccion}
+          
             pinColor={markerColors[index]}
             onPress={() => handleMarkerPress(index)}
           />
@@ -135,7 +138,7 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
         markers[selectedMarker].ubicacionActual !== true && (
           // Utiliza el nuevo componente para manejar los detalles del marcador
           <FloatingDetailsButton
-            title={markers[selectedMarker].title}
+            title={markers[selectedMarker].razonSocial}
             onPressDetails={() => handleDetailsPress(selectedMarker)}
             onPressEdit={() => handleEditPress(selectedMarker)}
           />
@@ -149,12 +152,12 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
         markerData={selectedMarkerData}
       />
       {/*Modal Edit */}
-      <MarkerModalEdit
+      {selectedMarkerData && <MarkerModalEdit
         isVisible={isModalVisibleEdit}
         onClose={handleEditClose}
         update={getData}
         markerData={selectedMarkerData}
-      />
+      /> }
       <TouchableOpacity
         style={{
           position: "absolute",

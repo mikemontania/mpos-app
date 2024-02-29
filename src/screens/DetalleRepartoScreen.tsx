@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text } from "react-native";
 import { useIsFocused, useRoute } from "@react-navigation/native";
-import apiAxios from "../api/axios";
-import { Documento, Reparto } from "../interfaces/Reparto.interfaces";
+import apiAxios from "../api/axios"; 
 import { MapWithMarkers } from "../componentes/MapWithMarkers";
 import Geolocation from "@react-native-community/geolocation";
 
@@ -11,18 +10,19 @@ interface RouteParams {
 }
 
 export interface Marcador {
-  coordinate: { latitude: number; longitude: number };
-  title: string;
-  description: string;
+  latitud: number;
+  longitud: number;
+   razonSocial: string;
+   docNro: string;
   direccion: string;
   telefono: string;
   entregado: boolean;
   ubicacionActual: boolean;
-  nroComprobante: string;
+  comprobante: string;
   importe: number;
   codVenta: number;
   codCliente: number;
-  codRepartoDoc: number;
+  codRepartoDocs: number;
 }
 
 export const DetalleRepartoScreen: React.FC = () => {
@@ -30,7 +30,6 @@ export const DetalleRepartoScreen: React.FC = () => {
   const { codReparto } = route.params as RouteParams;
   const isFocused = useIsFocused();
   const [markers, setMarkers] = useState<Marcador[]>([]);
-  const [repartoModel, setRepartoModel] = useState<Reparto | undefined>();
   const [currentLocation, setCurrentLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -48,43 +47,25 @@ export const DetalleRepartoScreen: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const { data } = await apiAxios.get(`/repartos/${codReparto}`);
+      const { data } = await apiAxios.get(
+        `/repartos/marcadores?codreparto=${codReparto}`
+      );
+      console.log(data);
       if (data) {
-        setRepartoModel(data);
-
-        const nuevosMarcadores = data.documento.map((documento: Documento) => ({
-          coordinate: {
-            latitude: documento.cliente.latitud || 0,
-            longitude: documento.cliente.longitud || 0
-          },
-          codVenta:documento.venta.codVenta,
-          nroComprobante: documento.venta.nroComprobante,
-          importe: documento.venta.importeTotal,
-          title: documento.cliente.razonSocial || "",
-          description: documento.cliente.direccion || "",
-          codCliente:documento.cliente.codCliente,
-          direccion:documento.cliente.direccion,
-          telefono:documento.cliente.telefono,
-          entregado: documento.entregado,
-          codRepartoDoc:documento.codRepartoDocs,
-          ubicacionActual:false
-        }));
-
         // Agregar tu ubicación actual como marcador adicional
         Geolocation.getCurrentPosition((info) => {
           const ubicacionActual = {
-            coordinate: {
-              latitude: info.coords.latitude,
-              longitude: info.coords.longitude
-            },
-            title: "Ubicación Actual",
-            description: "Tu ubicación actual",
+            latitud: info.coords.latitude,
+            longitud: info.coords.longitude,
+            razonSocial: "Yo",
+            docNro:'',
+            direccion: "Tu ubicación actual",
             entregado: true, // Puedes ajustar esto según tus necesidades
-            ubicacionActual:true
+            ubicacionActual: true
           };
 
           // Agregar la ubicación actual a la lista de marcadores
-          setMarkers([...nuevosMarcadores, ubicacionActual]);
+          setMarkers([...data, ubicacionActual]);
         });
 
         // Detener la carga después de actualizar los marcadores
@@ -104,7 +85,6 @@ export const DetalleRepartoScreen: React.FC = () => {
         <Text>Cargando...</Text>
       ) : (
         <MapWithMarkers
-          repartoModel={repartoModel} 
           getData={getData}
           markers={markers}
         />

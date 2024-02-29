@@ -19,6 +19,7 @@ import { PedidoScreen } from "../screens/PedidoScreen";
 import { RepartoScreen } from "../screens/RepartoScreen";
 import { AuthContext } from "../context/AuthContex";
 import { DetalleRepartoScreen } from "../screens/DetalleRepartoScreen";
+import { PDFViewer } from "../componentes/PDFViewer";
 const Drawer = createDrawerNavigator();
 
 export const MenuLateral = () => {
@@ -60,7 +61,11 @@ export const MenuLateral = () => {
         component={DetalleRepartoScreen}
         options={{ drawerLabel: "Reparto" }}
       />
-
+         <Drawer.Screen
+    name="PDFViewer"
+    component={PDFViewer}
+    options={{ drawerLabel: "PDF Viewer" }}
+  />
 
     </Drawer.Navigator>
   );

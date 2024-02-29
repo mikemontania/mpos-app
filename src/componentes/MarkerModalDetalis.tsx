@@ -67,7 +67,7 @@ export const MarkerModalDetails: React.FC<MarkerModalDetailsProps> = ({
     if (markerData) {
       try {
         const { data } = await apiAxios.put(
-          `/repartos/entregar?id=${markerData.codRepartoDoc}`
+          `/repartos/entregar?id=${markerData.codRepartoDocs}`
         );
 
         update();
