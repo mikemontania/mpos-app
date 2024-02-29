@@ -1,19 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { View, Text } from "react-native";
-import { useIsFocused, useRoute } from "@react-navigation/native";
-import apiAxios from "../api/axios"; 
+import { View, Text, TouchableOpacity } from "react-native";
+import { useIsFocused, useNavigation, useRoute } from "@react-navigation/native";
+import apiAxios from "../api/axios";
 import { MapWithMarkers } from "../componentes/MapWithMarkers";
 import Geolocation from "@react-native-community/geolocation";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { THEME_COLOR } from "../theme/theme";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "./RepartoScreen";
 
 interface RouteParams {
   codReparto: number;
 }
 
+export type DetalleRepartoScreenNavigationProp = StackNavigationProp<  RootStackParamList,  "DetalleRepartoScreen">;
 export interface Marcador {
   latitud: number;
   longitud: number;
-   razonSocial: string;
-   docNro: string;
+  razonSocial: string;
+  docNro: string;
   direccion: string;
   telefono: string;
   entregado: boolean;
@@ -27,13 +33,12 @@ export interface Marcador {
 
 export const DetalleRepartoScreen: React.FC = () => {
   const route = useRoute();
+  const navigation = useNavigation<DetalleRepartoScreenNavigationProp>();
   const { codReparto } = route.params as RouteParams;
   const isFocused = useIsFocused();
   const [markers, setMarkers] = useState<Marcador[]>([]);
-  const [currentLocation, setCurrentLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  }>();
+  const [showButton, setShowButton] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -41,6 +46,16 @@ export const DetalleRepartoScreen: React.FC = () => {
       getData();
     }
   }, [isFocused]);
+
+  const finalizar = async () => {
+    console.log("repartos"); 
+    try {
+      const { data } = await apiAxios.put(`/repartos/finalizar?id=${codReparto}` );
+      navigation.navigate("RepartoScreen")
+    } catch (error: any) {
+      console.error("Error al finalizar", error.message); 
+    }
+  };
 
   const getData = async () => {
     console.log("repartos");
@@ -52,13 +67,15 @@ export const DetalleRepartoScreen: React.FC = () => {
       );
       console.log(data);
       if (data) {
+        // Verificar si todos los marcadores tienen entregado en true
+        const allDelivered = data.every((marker: Marcador) => marker.entregado);
         // Agregar tu ubicación actual como marcador adicional
         Geolocation.getCurrentPosition((info) => {
           const ubicacionActual = {
             latitud: info.coords.latitude,
             longitud: info.coords.longitude,
             razonSocial: "Yo",
-            docNro:'',
+            docNro: "",
             direccion: "Tu ubicación actual",
             entregado: true, // Puedes ajustar esto según tus necesidades
             ubicacionActual: true
@@ -67,7 +84,8 @@ export const DetalleRepartoScreen: React.FC = () => {
           // Agregar la ubicación actual a la lista de marcadores
           setMarkers([...data, ubicacionActual]);
         });
-
+        // Actualizar el estado del botón flotante
+        setShowButton(allDelivered);
         // Detener la carga después de actualizar los marcadores
         setIsLoading(false);
       }
@@ -84,10 +102,24 @@ export const DetalleRepartoScreen: React.FC = () => {
       {isLoading ? (
         <Text>Cargando...</Text>
       ) : (
-        <MapWithMarkers
-          getData={getData}
-          markers={markers}
-        />
+        <>
+          <MapWithMarkers getData={getData} markers={markers} />
+          {showButton && (
+            <TouchableOpacity
+              style={{
+                position: "absolute",
+                top: 20,
+                left: 20,
+                backgroundColor: "green",
+                borderRadius: 30,
+                padding: 10
+              }}
+              onPress={finalizar}
+            >
+              <FontAwesomeIcon icon={faCheck} size={20} color={"white"} />
+            </TouchableOpacity>
+          )}
+        </>
       )}
     </View>
   );

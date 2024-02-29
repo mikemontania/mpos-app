@@ -5,7 +5,7 @@ import { Reparto } from "../interfaces/Reparto.interfaces";
 import { CustomCallout } from "./CustomCallout";
 import { FloatingDetailsButton } from "./FloatingDetailsButton";
 import { MarkerModalDetails } from "./MarkerModalDetalis";
-import { faSync } from "@fortawesome/free-solid-svg-icons";
+import { faSearchPlus, faSync } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { TouchableOpacity } from "react-native";
 import { THEME_COLOR } from "../theme/theme";
@@ -81,7 +81,19 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
       mapViewRef.current.animateToRegion(initialRegion, 0); // Ajusta la región inicial
     }
   }, [markers]);
-
+  const handleZoomToFitMarkers = () => {
+    if (markers.length > 0 && mapViewRef.current) {
+      const coordinates = markers.map((marker) => ({
+        latitude: marker.latitud,
+        longitude: marker.longitud
+      }));
+      const edgePadding = { top: 70, right: 70, bottom: 70, left: 70 };
+      mapViewRef.current.fitToCoordinates(coordinates, {
+        edgePadding,
+        animated: true
+      });
+    }
+  };
   const handleCalloutClose = () => {
     setSelectedMarker(null);
     setIsModalVisible(false);
@@ -158,6 +170,20 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
         update={getData}
         markerData={selectedMarkerData}
       /> }
+         {/* Botón para hacer zoom a los marcadores */}
+         <TouchableOpacity
+        style={{
+          position: "absolute",
+          bottom: 70,
+          left: 20,
+          backgroundColor: "white",
+          borderRadius: 30,
+          padding: 10
+        }}
+        onPress={handleZoomToFitMarkers}
+      >
+        <FontAwesomeIcon icon={faSearchPlus} size={20} color={THEME_COLOR} />
+      </TouchableOpacity>
       <TouchableOpacity
         style={{
           position: "absolute",

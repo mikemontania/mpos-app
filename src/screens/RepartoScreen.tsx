@@ -8,6 +8,7 @@ import { Reparto, RepartoPendiente } from "../interfaces/Reparto.interfaces";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faFile, faInfoCircle, faMap } from "@fortawesome/free-solid-svg-icons";
+import { faCar,   } from "@fortawesome/free-solid-svg-icons";
 
 export type RootStackParamList = {
   RepartoScreen: undefined;
@@ -15,10 +16,7 @@ export type RootStackParamList = {
   DetalleRepartoScreen: { codReparto: number };
 };
 
-export type RepartoScreensNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  "RepartoScreen"
->;
+export type RepartoScreensNavigationProp = StackNavigationProp<  RootStackParamList,  "RepartoScreen">;
 type Item = {
   item: RepartoPendiente;
   codEmpresa: number;
@@ -144,10 +142,9 @@ export const RepartoScreen = () => {
       if (error.response) console.log("Error al realizar la consulta:", error);
     }
   };
-
   return (
     <View style={appStyles.container}>
-      {repartoModel && (
+      {repartoModel.length > 0 ? (
         <FlatList
           data={repartoModel}
           renderItem={({ item }) => (
@@ -167,7 +164,14 @@ export const RepartoScreen = () => {
           )}
           keyExtractor={(item) => item.codReparto.toString()}
         />
+      ) : (
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <FontAwesomeIcon icon={faCar} size={50} color={THEME_COLOR} />
+          <Text style={{ color: THEME_COLOR, textAlign: "center" }}>
+            No existen repartos pendientes
+          </Text>
+        </View>
       )}
     </View>
   );
-};
+      }
