@@ -4,79 +4,12 @@ import { AuthContext } from "../context/AuthContex";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import apiAxios from "../api/axios";
 import { THEME_COLOR, appStyles } from "../theme/theme";
-import { Reparto, RepartoPendiente } from "../interfaces/Reparto.interfaces";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faFile, faInfoCircle, faMap } from "@fortawesome/free-solid-svg-icons";
-import { faCar,   } from "@fortawesome/free-solid-svg-icons";
-
-export type RootStackParamList = {
-  RepartoScreen: undefined;
-  PDFViewer: { pdf: any };
-  DetalleRepartoScreen: { codReparto: number };
-};
-
-export type RepartoScreensNavigationProp = StackNavigationProp<  RootStackParamList,  "RepartoScreen">;
-type Item = {
-  item: RepartoPendiente;
-  codEmpresa: number;
-  onItemPress: (item: RepartoPendiente) => void;
-  onDetailSelect: (item: RepartoPendiente) => void;
-  onDocSelect: (item: RepartoPendiente) => void;
-};
-
-const Item = ({ item, onItemPress, onDetailSelect, onDocSelect }: Item) => {
-  return (
-    <TouchableOpacity onPress={() => onItemPress(item)}>
-    <View style={appStyles.card}>
-      <View style={appStyles.list}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Text style={appStyles.buttonText}>Reparto:</Text>
-          <Text style={appStyles.name}>{item.codReparto}</Text>
-        </View>
-
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Text style={appStyles.buttonText}>Documentos:</Text>
-          <Text style={appStyles.description}>{item.documentos}</Text>
-        </View>
-        {/* Botones con iconos */}
- {/*        <View
-          style={{
-            marginTop: 10,
-            flexDirection: "row",
-            justifyContent: "space-around"
-          }}
-        >
-        
-          <TouchableOpacity onPress={() => onItemPress(item)}>
-            <View style={appStyles.iconButton}>
-              <FontAwesomeIcon icon={faMap} size={32} color={THEME_COLOR} />
-            </View>
-          </TouchableOpacity>
-
-        
-          <TouchableOpacity onPress={() => onDetailSelect(item)}>
-            <View style={appStyles.iconButton}>
-              <FontAwesomeIcon
-                icon={faInfoCircle}
-                size={32}
-                color={THEME_COLOR}
-              />
-            </View>
-          </TouchableOpacity>
-
-        
-          <TouchableOpacity onPress={() => onDocSelect(item)}>
-            <View style={appStyles.iconButton}>
-              <FontAwesomeIcon icon={faFile} size={32} color={THEME_COLOR} />
-            </View>
-          </TouchableOpacity>
-        </View> */}
-      </View>
-    </View>
-    </TouchableOpacity>
-  );
-};
+import {   RepartoPendiente } from "../interfaces/Reparto.interfaces";
+ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome"; 
+import { faCar } from "@fortawesome/free-solid-svg-icons"; 
+import { RepartoScreensNavigationProp } from "../types/types";
+import { Item } from "../componentes/ItemReparto";
+ 
 export const RepartoScreen = () => {
   const { user } = useContext(AuthContext);
   const [repartoModel, setRepartoModel] = useState<RepartoPendiente[]>([]);
@@ -89,14 +22,25 @@ export const RepartoScreen = () => {
     });
   };
 
+  const finalizarReparto = async (item: any) => {
+    try {
+      const { data } = await apiAxios.put(
+        `/repartos/finalizar?id=${item.codReparto}`
+      );
+
+      getData();
+    } catch (error: any) {
+      console.error("Error al realizar la consulta:", error.message);
+    }
+  };
+
   const getDetail = async (item: any) => {
     try {
       const { data } = await apiAxios.get(
         `/repartos/reportedetalle/?fecha=${item.fechaReparto}&codempresa=${user?.codEmpresa}&codreparto=${item.codReparto}`,
         { responseType: "blob" }
       );
-      if (data) { 
-       
+      if (data) {
         navigation.navigate("PDFViewer", {
           pdf: { data }
         });
@@ -111,13 +55,11 @@ export const RepartoScreen = () => {
         `/repartos/reportedocs/?fecha=${item.fechaReparto}&codempresa=${user?.codEmpresa}&codreparto=${item.codReparto}`,
         { responseType: "blob" }
       );
-      if (data) { 
-       
+      if (data) {
         navigation.navigate("PDFViewer", {
           pdf: { data }
         });
-      
-    }
+      }
     } catch (error: any) {
       if (error.response) console.log("Error al realizar la consulta:", error);
     }
@@ -154,18 +96,17 @@ export const RepartoScreen = () => {
               onItemPress={(selectedItem: RepartoPendiente) =>
                 handleItemPress(selectedItem)
               }
-              onDetailSelect={(selectedItem: RepartoPendiente) =>
-                getDetail(selectedItem)
-              }
-              onDocSelect={(selectedItem: RepartoPendiente) =>
-                getDoc(selectedItem)
+              onFinished={(selectedItem: RepartoPendiente) =>
+                finalizarReparto(selectedItem)
               }
             />
           )}
           keyExtractor={(item) => item.codReparto.toString()}
         />
       ) : (
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
           <FontAwesomeIcon icon={faCar} size={50} color={THEME_COLOR} />
           <Text style={{ color: THEME_COLOR, textAlign: "center" }}>
             No existen repartos pendientes
@@ -174,4 +115,4 @@ export const RepartoScreen = () => {
       )}
     </View>
   );
-      }
+};

@@ -152,9 +152,7 @@ export const appStyles = StyleSheet.create({
     }, 
 
     iconButton: {
-        backgroundColor: "white", // Puedes ajustar el color de fondo según tus preferencias
-        borderRadius: 10, // Puedes ajustar el radio según tus preferencias
-        padding: 10, // Puedes ajustar el espaciado interno según tus preferencias
+     padding:10
       },
     
 });

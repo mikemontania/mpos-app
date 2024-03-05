@@ -4,17 +4,14 @@ import { useIsFocused, useNavigation, useRoute } from "@react-navigation/native"
 import apiAxios from "../api/axios";
 import { MapWithMarkers } from "../componentes/MapWithMarkers";
 import Geolocation from "@react-native-community/geolocation";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome"; 
+import { faArrowAltCircleLeft, faCheck } from "@fortawesome/free-solid-svg-icons"; 
+import { DetalleRepartoScreenNavigationProp, RootStackParamList } from "../types/types";
 import { THEME_COLOR } from "../theme/theme";
-import { faCheck } from "@fortawesome/free-solid-svg-icons";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "./RepartoScreen";
-
-interface RouteParams {
+interface DetalleRouteParams {
   codReparto: number;
 }
 
-export type DetalleRepartoScreenNavigationProp = StackNavigationProp<  RootStackParamList,  "DetalleRepartoScreen">;
 export interface Marcador {
   latitud: number;
   longitud: number;
@@ -34,7 +31,7 @@ export interface Marcador {
 export const DetalleRepartoScreen: React.FC = () => {
   const route = useRoute();
   const navigation = useNavigation<DetalleRepartoScreenNavigationProp>();
-  const { codReparto } = route.params as RouteParams;
+  const { codReparto } = route.params as DetalleRouteParams;
   const isFocused = useIsFocused();
   const [markers, setMarkers] = useState<Marcador[]>([]);
   const [showButton, setShowButton] = useState(false);
@@ -51,12 +48,19 @@ export const DetalleRepartoScreen: React.FC = () => {
     console.log("repartos"); 
     try {
       const { data } = await apiAxios.put(`/repartos/finalizar?id=${codReparto}` );
-      navigation.navigate("RepartoScreen")
+      navigation.navigate("Reparto",undefined)
     } catch (error: any) {
       console.error("Error al finalizar", error.message); 
     }
   };
-
+  const atras = async () => {
+    console.log("repartos"); 
+    try {
+       navigation.navigate("Reparto",undefined)
+    } catch (error: any) {
+      console.error("Error  atras", error.message); 
+    }
+  };
   const getData = async () => {
     console.log("repartos");
     setIsLoading(true);
@@ -104,19 +108,32 @@ export const DetalleRepartoScreen: React.FC = () => {
       ) : (
         <>
           <MapWithMarkers getData={getData} markers={markers} />
+          <TouchableOpacity
+              style={{
+                position: "absolute",
+                top: 20,
+                right: 20,
+                backgroundColor: 'white',
+                borderRadius: 30,
+                padding: 10
+              }}
+              onPress={atras}
+            >
+              <FontAwesomeIcon icon={faArrowAltCircleLeft} size={20} color={THEME_COLOR} />
+            </TouchableOpacity>
           {showButton && (
             <TouchableOpacity
               style={{
                 position: "absolute",
-                top: 20,
-                left: 20,
-                backgroundColor: "green",
+                top: 70,
+                right: 20,
+                backgroundColor: 'white',
                 borderRadius: 30,
                 padding: 10
               }}
               onPress={finalizar}
             >
-              <FontAwesomeIcon icon={faCheck} size={20} color={"white"} />
+                <FontAwesomeIcon icon={faCheck} size={20} color={THEME_COLOR} />
             </TouchableOpacity>
           )}
         </>

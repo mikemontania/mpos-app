@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import MapView, { Marker, Callout as BaseCallout } from "react-native-maps";
-import { Marcador } from "../screens/DetalleRepartoScreen";
-import { Reparto } from "../interfaces/Reparto.interfaces";
+import { Marcador } from "../screens/DetalleRepartoScreen"; 
 import { CustomCallout } from "./CustomCallout";
 import { FloatingDetailsButton } from "./FloatingDetailsButton";
 import { MarkerModalDetails } from "./MarkerModalDetalis";
-import { faSearchPlus, faSync } from "@fortawesome/free-solid-svg-icons";
+import { 
+  faSearchPlus,
+  faSync
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { TouchableOpacity } from "react-native";
 import { THEME_COLOR } from "../theme/theme";
@@ -138,11 +140,10 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
               longitude: marker.longitud
             }}
             title={marker.razonSocial + " - " + marker.docNro}
-            description={ marker.direccion}
-          
+            description={marker.direccion}
             pinColor={markerColors[index]}
             onPress={() => handleMarkerPress(index)}
-          />
+          ></Marker>
         ))}
       </MapView>
 
@@ -164,14 +165,16 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
         markerData={selectedMarkerData}
       />
       {/*Modal Edit */}
-      {selectedMarkerData && <MarkerModalEdit
-        isVisible={isModalVisibleEdit}
-        onClose={handleEditClose}
-        update={getData}
-        markerData={selectedMarkerData}
-      /> }
-         {/* Botón para hacer zoom a los marcadores */}
-         <TouchableOpacity
+      {selectedMarkerData && (
+        <MarkerModalEdit
+          isVisible={isModalVisibleEdit}
+          onClose={handleEditClose}
+          update={getData}
+          markerData={selectedMarkerData}
+        />
+      )}
+      {/* Botón para hacer zoom a los marcadores */}
+      <TouchableOpacity
         style={{
           position: "absolute",
           bottom: 70,

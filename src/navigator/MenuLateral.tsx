@@ -23,6 +23,8 @@ import { PDFViewer } from "../componentes/PDFViewer";
 const Drawer = createDrawerNavigator();
 
 export const MenuLateral = () => {
+ const { user, token, logOut } = useContext(AuthContext);
+
   const dimensions = useWindowDimensions();
   return (
     <Drawer.Navigator
@@ -56,17 +58,19 @@ export const MenuLateral = () => {
         component={RepartoScreen}
         options={{ drawerLabel: "Reparto" }}
       />
-       <Drawer.Screen
+      <Drawer.Screen
         name="DetalleRepartoScreen"
         component={DetalleRepartoScreen}
-        options={{ drawerLabel: "Reparto" }}
+        options={{
+          drawerLabel: "Detalle Reparto",
+          headerTitle: "Mapa" // Agrega esta línea para personalizar el título
+        }}
       />
-         <Drawer.Screen
-    name="PDFViewer"
-    component={PDFViewer}
-    options={{ drawerLabel: "PDF Viewer" }}
-  />
-
+      <Drawer.Screen
+        name="PDFViewer"
+        component={PDFViewer}
+        options={{ drawerLabel: "PDF Viewer" }}
+      />
     </Drawer.Navigator>
   );
 };
@@ -81,7 +85,7 @@ const MenuInterno = ({ navigation }: DrawerContentComponentProps) => {
           source={require("../assets/logo.png")}
           style={appStyles.avatar}
         />
-          <Text style={appStyles.avatarTexto}>{user?.username}</Text>
+        <Text style={appStyles.avatarTexto}>{user?.username}</Text>
       </View>
 
       {/* Opciones de menú */}
@@ -107,10 +111,7 @@ const MenuInterno = ({ navigation }: DrawerContentComponentProps) => {
           <Text style={appStyles.menuTexto}>Reparto</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={appStyles.menuBoton}
-          onPress={() => logOut()}
-        >
+        <TouchableOpacity style={appStyles.menuBoton} onPress={() => logOut()}>
           <Text style={appStyles.menuTexto}>Salir</Text>
         </TouchableOpacity>
       </View>

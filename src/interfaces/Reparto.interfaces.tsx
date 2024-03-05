@@ -3,8 +3,12 @@ import { Producto, Unidad, Venta, Cliente } from "./Venta.interfaces";
 export interface RepartoPendiente {
     codReparto: number;
     documentos: number;
+    totalGs: number;
+    totalKg: number;
     fechaReparto: string;
     finalizado: boolean;
+    entregados: number;
+    faltantes: number;
 }
 export interface Reparto {
     codReparto:          number;
