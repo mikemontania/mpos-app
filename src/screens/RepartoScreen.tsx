@@ -9,12 +9,14 @@ import {   RepartoPendiente } from "../interfaces/Reparto.interfaces";
 import { faCar } from "@fortawesome/free-solid-svg-icons"; 
 import { RepartoScreensNavigationProp } from "../types/types";
 import { Item } from "../componentes/ItemReparto";
+import { LoadingScreen } from "./LoadingScreen";
  
 export const RepartoScreen = () => {
   const { user } = useContext(AuthContext);
   const [repartoModel, setRepartoModel] = useState<RepartoPendiente[]>([]);
   const isFocused = useIsFocused();
   const navigation = useNavigation<RepartoScreensNavigationProp>();
+  const [isLoading, setIsLoading] = useState(true);  
 
   const handleItemPress = (item: any) => {
     navigation.navigate("DetalleRepartoScreen", {
@@ -71,22 +73,28 @@ export const RepartoScreen = () => {
     }
   }, [isFocused]);
   const getData = async () => {
+    setIsLoading(true); // Agregado: Iniciar el estado de carga
+
     try {
       const { data } = await apiAxios.get(
         `/repartos/repartochofer/?codempresa=1&chofer=${user?.codPersonaErp}`
       );
+
       if (data) {
         console.log(data);
-
         setRepartoModel(data);
       }
     } catch (error: any) {
       if (error.response) console.log("Error al realizar la consulta:", error);
+    } finally {
+      setIsLoading(false); // Agregado: Finalizar el estado de carga
     }
   };
   return (
     <View style={appStyles.container}>
-      {repartoModel.length > 0 ? (
+      {isLoading ? (
+        <LoadingScreen />
+      ) : repartoModel.length > 0 ? (
         <FlatList
           data={repartoModel}
           renderItem={({ item }) => (

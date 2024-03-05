@@ -21,6 +21,7 @@ import {
 import { ImageLoader } from "./ImagenLoader";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { LoadingScreen } from "./LoadingScreen";
 interface MarkerModalDetailsProps {
   isVisible: boolean;
   onClose: () => void;
@@ -48,20 +49,21 @@ export const MarkerModalDetails: React.FC<MarkerModalDetailsProps> = ({
   const getData = async () => {
     if (markerData) {
       try {
+        setLoading(true); // Iniciar el estado de carga
         const { data } = await apiAxios.get(
           `/ventas/model/${markerData.codVenta}`
         );
-        console.log(`/ventas/model/${markerData.codVenta}`);
         if (data) {
-          console.log(data);
           setVenta(data.venta);
-          console.log(data);
         }
       } catch (error: any) {
         console.error("Error al realizar la consulta:", error.message);
+      } finally {
+        setLoading(false); // Finalizar el estado de carga
       }
     }
   };
+
 
   const entregar = async () => {
     if (markerData) {
@@ -87,7 +89,7 @@ export const MarkerModalDetails: React.FC<MarkerModalDetailsProps> = ({
     >
       <View style={modalStyles.container}>
         {loading ? (
-          <ActivityIndicator size="large" color="black" />
+          <ActivityIndicator size="large" color={THEME_COLOR} />
         ) : (
           <>
             {markerData !== null && (

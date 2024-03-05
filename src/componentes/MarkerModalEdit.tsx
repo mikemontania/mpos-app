@@ -4,20 +4,18 @@ import {
   Text,
   TouchableOpacity,
   Modal,
-  ActivityIndicator,
-  ScrollView,
+  ActivityIndicator, 
   StyleSheet,
   TextInput,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard
 } from "react-native";
-import { THEME_COLOR, appStyles } from "../theme/theme";
+import { THEME_COLOR  } from "../theme/theme";
 import apiAxios from "../api/axios";
 import { Marcador } from "../screens/DetalleRepartoScreen";
 import {
-  faTimes,
-  faKeyboard,
+  faTimes, 
   faMapMarkerAlt,
   faPhone
 } from "@fortawesome/free-solid-svg-icons";
@@ -58,6 +56,7 @@ export const MarkerModalEdit: React.FC<MarkerModalEditProps> = ({
   const guardar = async () => {
     if (markerData) {
       try {
+        setLoading(true); 
         console.log(markerData);
         const { data } = await apiAxios.put(`/repartos/cliente`, {
           codCliente: +markerData.codCliente,
@@ -70,6 +69,8 @@ export const MarkerModalEdit: React.FC<MarkerModalEditProps> = ({
         onClose();
       } catch (error: any) {
         console.error("Error al realizar la consulta:", error.message);
+      }finally {
+        setLoading(false);  
       }
     }
   };

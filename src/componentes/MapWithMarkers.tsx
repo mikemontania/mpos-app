@@ -5,6 +5,7 @@ import { CustomCallout } from "./CustomCallout";
 import { FloatingDetailsButton } from "./FloatingDetailsButton";
 import { MarkerModalDetails } from "./MarkerModalDetalis";
 import { 
+  faCrosshairs,
   faSearchPlus,
   faSync
 } from "@fortawesome/free-solid-svg-icons";
@@ -185,7 +186,7 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
         }}
         onPress={handleZoomToFitMarkers}
       >
-        <FontAwesomeIcon icon={faSearchPlus} size={20} color={THEME_COLOR} />
+        <FontAwesomeIcon icon={faCrosshairs} size={20} color={THEME_COLOR} />
       </TouchableOpacity>
       <TouchableOpacity
         style={{

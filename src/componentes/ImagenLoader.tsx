@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Image, ActivityIndicator, Text } from 'react-native';
 import apiAxios from '../api/axios';
+import { THEME_COLOR } from '../theme/theme';
 
 interface ImageLoaderProps {
   imageUrl: string;
@@ -36,7 +37,7 @@ export const ImageLoader: React.FC<ImageLoaderProps> = ({ imageUrl }) => {
   }, [imageUrl]);
 
   if (loading) {
-    return <ActivityIndicator size="large" color="black" />;
+    return <ActivityIndicator size="large" color={'white'} />;
   }
 
   if (error) {

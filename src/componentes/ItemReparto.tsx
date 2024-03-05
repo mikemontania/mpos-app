@@ -36,7 +36,7 @@ export const Item = ({ item, onItemPress, onFinished }: ItemReparto) => {
           >
             <TouchableOpacity  style={{flex:1,flexDirection:'row' , alignContent:"center", justifyContent:'center' ,margin:5  ,backgroundColor:'white'} } onPress={() => onItemPress(item)}>
                 <Text style={{ color: THEME_COLOR, paddingVertical:10, margin:5  }}>
-                  Entregas
+                 Marcadores
                 </Text>
               <View style={appStyles.iconButton}>
                 <FontAwesomeIcon icon={faMap} size={32} color={THEME_COLOR} />

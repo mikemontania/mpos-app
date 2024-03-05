@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faArrowAltCircleLeft, faCheck } from "@fortawesome/free-solid-svg-icons"; 
 import { DetalleRepartoScreenNavigationProp, RootStackParamList } from "../types/types";
 import { THEME_COLOR } from "../theme/theme";
+import { LoadingScreen } from "./LoadingScreen";
 interface DetalleRouteParams {
   codReparto: number;
 }
@@ -104,7 +105,7 @@ export const DetalleRepartoScreen: React.FC = () => {
     <View style={{ flex: 1 }}>
       {/* Otras partes de tu componente */}
       {isLoading ? (
-        <Text>Cargando...</Text>
+       <LoadingScreen />
       ) : (
         <>
           <MapWithMarkers getData={getData} markers={markers} />

@@ -1,4 +1,4 @@
-import { faEdit, faInfo, faUser } from "@fortawesome/free-solid-svg-icons";
+import { faCheckCircle, faEdit, faInfo, faInfoCircle, faList, faUser, faUserAstronaut } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
@@ -46,7 +46,7 @@ export const FloatingDetailsButton: React.FC<FloatingDetailsButtonProps> = ({
         }}
       >
         <FontAwesomeIcon
-          icon={faInfo}
+          icon={faList }
           size={20}
           color={THEME_COLOR}
            
@@ -64,7 +64,7 @@ export const FloatingDetailsButton: React.FC<FloatingDetailsButtonProps> = ({
         }}
       >
         <FontAwesomeIcon
-          icon={faEdit}
+          icon={faUserAstronaut}
           size={20}
           color= {THEME_COLOR}
            
