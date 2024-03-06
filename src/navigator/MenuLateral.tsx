@@ -97,12 +97,12 @@ const MenuInterno = ({ navigation }: DrawerContentComponentProps) => {
           <Text style={appStyles.menuTexto}>Principal</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
+      {/*   <TouchableOpacity
           style={appStyles.menuBoton}
           onPress={() => navigation.navigate("Pedido")}
         >
           <Text style={appStyles.menuTexto}>Pedido</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <TouchableOpacity
           style={appStyles.menuBoton}
