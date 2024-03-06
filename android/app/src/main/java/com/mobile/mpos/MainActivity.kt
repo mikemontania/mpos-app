@@ -1,4 +1,4 @@
-package com.mposapp
+package com.mobile.mpos
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

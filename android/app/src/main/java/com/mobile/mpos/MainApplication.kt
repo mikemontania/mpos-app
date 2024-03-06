@@ -1,4 +1,4 @@
-package com.mposapp
+package com.mobile.mpos
 
 import android.app.Application
 import com.facebook.react.PackageList
