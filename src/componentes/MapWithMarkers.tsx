@@ -13,6 +13,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { TouchableOpacity } from "react-native";
 import { THEME_COLOR } from "../theme/theme";
 import { MarkerModalEdit } from "./MarkerModalEdit";
+import Geolocation from "@react-native-community/geolocation";
 
 interface MapWithMarkersProps {
   markers: Marcador[];
@@ -29,7 +30,9 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
   const [isModalVisibleEdit, setIsModalVisibleEdit] = useState(false);
   const [selectedMarkerData, setSelectedMarkerData] = useState<Marcador | null>(
     null
-  );
+  ); 
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+
   const mapViewRef = useRef<MapView>(null);
 
   useEffect(() => {
@@ -41,61 +44,39 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
     // Actualiza los colores de los marcadores cuando cambia la propiedad entregado en los markers
     setMarkerColors(
       markers.map((marker) =>
-        marker.entregado ? (marker.ubicacionActual ? "blue" : "green") : "red"
+        marker.entregado ? "green": "red"
       )
     );
   }, [markers]);
 
   useEffect(() => {
-    let maxLat = -90;
-    let minLat = 90;
-    let maxLon = -180;
-    let minLon = 180;
-
-    markers.forEach((marker) => {
-      maxLat = Math.max(maxLat, marker.latitud);
-      minLat = Math.min(minLat, marker.latitud);
-      maxLon = Math.max(maxLon, marker.longitud);
-      minLon = Math.min(minLon, marker.longitud);
+    handleZoomToFitMarkers()
+  }, [markers]);
+ 
+  const handleZoomToFitMarkers = () => {
+    Geolocation.getCurrentPosition((info) => {
+      const ubicacionActual = {
+        latitude: info.coords.latitude,
+        longitude: info.coords.longitude
+      };
+      setUserLocation(ubicacionActual);
+      if (markers.length > 0 && mapViewRef.current) {
+        let coordinates = markers.map((marker) => ({
+          latitude: marker.latitud,
+          longitude: marker.longitud
+        }));
+        if (ubicacionActual) {
+          coordinates = [...coordinates, ubicacionActual];
+        }
+        const edgePadding = { top: 70, right: 70, bottom: 70, left: 70 };
+        mapViewRef.current.fitToCoordinates(coordinates, {
+          edgePadding,
+          animated: true
+        });
+      }
     });
 
-    const midLat = (maxLat + minLat) / 2;
-    const midLon = (maxLon + minLon) / 2;
-    const latDelta = maxLat - minLat + 0.02;
-    const lonDelta = maxLon - minLon + 0.02;
-
-    const initialRegion = {
-      latitude: midLat,
-      longitude: midLon,
-      latitudeDelta: latDelta,
-      longitudeDelta: lonDelta
-    };
-
-    if (markers.length > 0 && mapViewRef.current) {
-      const coordinates = markers.map((marker) => ({
-        latitude: marker.latitud,
-        longitude: marker.longitud
-      }));
-      const edgePadding = { top: 70, right: 70, bottom: 70, left: 70 };
-      mapViewRef.current.fitToCoordinates(coordinates, {
-        edgePadding,
-        animated: true
-      });
-      mapViewRef.current.animateToRegion(initialRegion, 0); // Ajusta la región inicial
-    }
-  }, [markers]);
-  const handleZoomToFitMarkers = () => {
-    if (markers.length > 0 && mapViewRef.current) {
-      const coordinates = markers.map((marker) => ({
-        latitude: marker.latitud,
-        longitude: marker.longitud
-      }));
-      const edgePadding = { top: 70, right: 70, bottom: 70, left: 70 };
-      mapViewRef.current.fitToCoordinates(coordinates, {
-        edgePadding,
-        animated: true
-      });
-    }
+ 
   };
   const handleCalloutClose = () => {
     setSelectedMarker(null);
@@ -124,7 +105,7 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
   return (
     <>
       <MapView
-        ref={mapViewRef}
+        ref={mapViewRef} 
         style={{ flex: 1 }}
         onMapReady={() => console.log("Mapa listo")}
         onPress={() => {
@@ -132,6 +113,7 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
             handleCalloutClose();
           }
         }}
+        showsUserLocation={true} 
       >
         {markers.map((marker, index) => (
           <Marker
@@ -148,8 +130,7 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
         ))}
       </MapView>
 
-      {selectedMarker !== null &&
-        markers[selectedMarker].ubicacionActual !== true && (
+      {selectedMarker !== null  && (
           // Utiliza el nuevo componente para manejar los detalles del marcador
           <FloatingDetailsButton
             title={markers[selectedMarker].razonSocial}

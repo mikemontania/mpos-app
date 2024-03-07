@@ -20,8 +20,7 @@ export interface Marcador {
   docNro: string;
   direccion: string;
   telefono: string;
-  entregado: boolean;
-  ubicacionActual: boolean;
+  entregado: boolean; 
   comprobante: string;
   importe: number;
   codVenta: number;
@@ -75,20 +74,8 @@ export const DetalleRepartoScreen: React.FC = () => {
         // Verificar si todos los marcadores tienen entregado en true
         const allDelivered = data.every((marker: Marcador) => marker.entregado);
         // Agregar tu ubicación actual como marcador adicional
-        Geolocation.getCurrentPosition((info) => {
-          const ubicacionActual = {
-            latitud: info.coords.latitude,
-            longitud: info.coords.longitude,
-            razonSocial: "Yo",
-            docNro: "",
-            direccion: "Tu ubicación actual",
-            entregado: true, // Puedes ajustar esto según tus necesidades
-            ubicacionActual: true
-          };
-
-          // Agregar la ubicación actual a la lista de marcadores
-          setMarkers([...data, ubicacionActual]);
-        });
+        
+        setMarkers([...data ]);
         // Actualizar el estado del botón flotante
         setShowButton(allDelivered);
         // Detener la carga después de actualizar los marcadores
