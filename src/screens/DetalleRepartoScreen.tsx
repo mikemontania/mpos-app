@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { useIsFocused, useNavigation, useRoute } from "@react-navigation/native";
 import apiAxios from "../api/axios";
-import { MapWithMarkers } from "../componentes/MapWithMarkers";
-import Geolocation from "@react-native-community/geolocation";
+import { MapWithMarkers } from "../componentes/MapWithMarkers"; 
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome"; 
 import { faArrowAltCircleLeft, faCheck } from "@fortawesome/free-solid-svg-icons"; 
 import { DetalleRepartoScreenNavigationProp, RootStackParamList } from "../types/types";
@@ -99,10 +98,9 @@ export const DetalleRepartoScreen: React.FC = () => {
           <TouchableOpacity
               style={{
                 position: "absolute",
-                top: 20,
-                right: 20,
-                backgroundColor: 'white',
-                borderRadius: 30,
+                top: 60,
+                right: 12,
+                backgroundColor: 'white', 
                 padding: 10
               }}
               onPress={atras}
@@ -111,18 +109,17 @@ export const DetalleRepartoScreen: React.FC = () => {
             </TouchableOpacity>
           {showButton && (
             <TouchableOpacity
-              style={{
-                position: "absolute",
-                top: 70,
-                right: 20,
-                backgroundColor: 'white',
-                borderRadius: 30,
-                padding: 10
-              }}
-              onPress={finalizar}
-            >
-                <FontAwesomeIcon icon={faCheck} size={20} color={THEME_COLOR} />
-            </TouchableOpacity>
+            style={{
+              position: "absolute",
+              top: 110,
+              right: 12,
+              backgroundColor: 'white', 
+              padding: 10
+            }}
+            onPress={finalizar}
+          >
+              <FontAwesomeIcon icon={faCheck} size={20} color={THEME_COLOR} />
+          </TouchableOpacity>
           )}
         </>
       )}

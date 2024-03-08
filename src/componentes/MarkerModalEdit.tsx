@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -17,10 +17,12 @@ import { Marcador } from "../screens/DetalleRepartoScreen";
 import {
   faTimes, 
   faMapMarkerAlt,
-  faPhone
+  faPhone,
+  faSearchMinus,
+  faSearchPlus
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, Region } from "react-native-maps";
 
 interface MarkerModalEditProps {
   isVisible: boolean;
@@ -39,9 +41,11 @@ export const MarkerModalEdit: React.FC<MarkerModalEditProps> = ({
   const [direccion, setDireccion] = useState("");
   const [telefono, setTelefono] = useState("");
   const [markerLocation, setMarkerLocation] = useState({
-    latitude: 0,
-    longitude: 0
+    latitude: markerData.latitud,
+    longitude: markerData.longitud
   });
+  const [mapRegion, setMapRegion] = useState<Region | undefined>(undefined);
+  const mapRef = useRef<MapView>(null);
 
   useEffect(() => {
     setLoading(markerData ? false : true);
@@ -51,8 +55,54 @@ export const MarkerModalEdit: React.FC<MarkerModalEditProps> = ({
       latitude: markerData.latitud,
       longitude: markerData.longitud
     });
+    setMapRegion({
+      latitude: markerData.latitud,
+      longitude: markerData.longitud,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+    });
   }, [markerData]);
 
+  const handleUbication  = () => {
+    if (mapRegion) {
+      const newRegion = {
+        ...mapRegion,
+        latitudeDelta: mapRegion.latitudeDelta  *2,
+        longitudeDelta: mapRegion.longitudeDelta*2 ,
+      };
+      setMapRegion(newRegion);
+    }
+  };
+
+  const handleZoomIn = async () => {
+    if (mapRef.current) {
+      try {
+        const camera = await mapRef.current.getCamera();
+        if (camera) {
+          const newZoom = camera.zoom! + 1;
+          mapRef.current.animateCamera({ zoom: newZoom });
+        }
+      } catch (error) {
+        console.error("Error al obtener la cámara:", error );
+      }
+    }
+  };
+  
+  const handleZoomOut = async () => {
+    if (mapRef.current) {
+      try {
+        const camera = await mapRef.current.getCamera();
+        if (camera) {
+          const newZoom = camera.zoom! - 1;
+          mapRef.current.animateCamera({ zoom: newZoom });
+        }
+      } catch (error) {
+        console.error("Error al obtener la cámara:", error );
+      }
+    }
+  };
+  
+   
   const guardar = async () => {
     if (markerData) {
       try {
@@ -141,19 +191,16 @@ export const MarkerModalEdit: React.FC<MarkerModalEditProps> = ({
                     </View>
                     {/* Mapa para modificar cliente */}
                     <View style={{ flex: 1 }}>
-                      <MapView
+                    <MapView
+                        ref={mapRef}
                         style={modalStyles.map}
-                        initialRegion={{
-                          latitude: markerLocation.latitude,
-                          longitude: markerLocation.longitude,
-                          latitudeDelta: 0.01,
-                          longitudeDelta: 0.01
-                        }}
+                        region={mapRegion}
                         onPress={(event) =>
                           setMarkerLocation(event.nativeEvent.coordinate)
                         }
+                        showsUserLocation={true}
                       >
-                        <Marker
+                         <Marker
                           coordinate={markerLocation}
                           draggable
                           onDragEnd={(event) =>
@@ -162,7 +209,39 @@ export const MarkerModalEdit: React.FC<MarkerModalEditProps> = ({
                         />
                       </MapView>
 
-                      {/* Botón flotante para cerrar el teclado */}
+                      {/* Botón flotante   */}
+                      <View style={modalStyles.zoomButtonsContainer}>
+                        <TouchableOpacity
+                          style={modalStyles.zoomButton}
+                          onPress={handleZoomIn}
+                        >
+                          <FontAwesomeIcon
+                            icon={faSearchPlus}
+                            size={20}
+                            color={THEME_COLOR}
+                          />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={modalStyles.zoomButton}
+                          onPress={handleZoomOut}
+                        >
+                          <FontAwesomeIcon
+                            icon={faSearchMinus}
+                            size={20}
+                            color={THEME_COLOR}
+                          />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={modalStyles.zoomButton}
+                          onPress={handleUbication}
+                        >
+                          <FontAwesomeIcon
+                            icon={faMapMarkerAlt}
+                            size={20}
+                            color={THEME_COLOR}
+                          />
+                        </TouchableOpacity>
+                      </View>
                     </View>
 
                     {/* Botón de guardar */}
@@ -236,6 +315,18 @@ export const modalStyles = StyleSheet.create({
     flex: 1,
     marginBottom: 10,
     borderRadius: 8
+  },
+  zoomButtonsContainer: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    flexDirection: "column",
+  },
+  zoomButton: {
+    backgroundColor: "white",
+    borderRadius: 30,
+    padding: 10,
+    marginBottom: 5,
   },
   keyboardButton: {
     position: "absolute",

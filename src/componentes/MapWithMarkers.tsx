@@ -24,6 +24,8 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
   getData,
   markers
 }) => {
+  const lat = -25.29688941637652;
+  const lng = -57.59492960130746;
   const [markerColors, setMarkerColors] = useState<string[]>([]);
   const [selectedMarker, setSelectedMarker] = useState<number | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -43,9 +45,15 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
   useEffect(() => {
     // Actualiza los colores de los marcadores cuando cambia la propiedad entregado en los markers
     setMarkerColors(
-      markers.map((marker) =>
-        marker.entregado ? "green": "red"
-      )
+      markers.map((marker) => {
+        if (marker.latitud === 0 && marker.longitud === 0) {
+          return "orange";
+        } else if ( marker.latitud === -25.29688941637652 &&  marker.longitud === -57.59492960130746 ) {
+          return "orange";
+        } else {
+          return marker.entregado ? "green" : "red";
+        }
+      })
     );
   }, [markers]);
 
@@ -53,30 +61,43 @@ export const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
     handleZoomToFitMarkers()
   }, [markers]);
  
-  const handleZoomToFitMarkers = () => {
-    Geolocation.getCurrentPosition((info) => {
+  const getCurrentPositionPromise = () => {
+    return new Promise<{ coords: { latitude: number; longitude: number } }>(
+      (resolve, reject) => {
+        Geolocation.getCurrentPosition(resolve, reject);
+      }
+    );
+  };
+  
+  const handleZoomToFitMarkers = async () => {
+    try {
+      const info = await getCurrentPositionPromise();
       const ubicacionActual = {
         latitude: info.coords.latitude,
         longitude: info.coords.longitude
       };
+  
       setUserLocation(ubicacionActual);
+  
       if (markers.length > 0 && mapViewRef.current) {
         let coordinates = markers.map((marker) => ({
           latitude: marker.latitud,
           longitude: marker.longitud
         }));
+  
         if (ubicacionActual) {
           coordinates = [...coordinates, ubicacionActual];
         }
+  
         const edgePadding = { top: 70, right: 70, bottom: 70, left: 70 };
         mapViewRef.current.fitToCoordinates(coordinates, {
           edgePadding,
           animated: true
         });
       }
-    });
-
- 
+    } catch (error) {
+      console.error("Error al obtener la ubicación actual:", error);
+    }
   };
   const handleCalloutClose = () => {
     setSelectedMarker(null);
