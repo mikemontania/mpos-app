@@ -4,22 +4,25 @@ import {
   Text,
   TouchableOpacity,
   Modal,
-  ActivityIndicator, 
+  ActivityIndicator,
   StyleSheet,
   TextInput,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
-  Keyboard
+  Keyboard,
+  Clipboard
 } from "react-native";
-import { THEME_COLOR  } from "../theme/theme";
+import { THEME_COLOR } from "../theme/theme";
 import apiAxios from "../api/axios";
 import { Marcador } from "../screens/DetalleRepartoScreen";
 import {
-  faTimes, 
+  faTimes,
   faMapMarkerAlt,
   faPhone,
   faSearchMinus,
-  faSearchPlus
+  faSearchPlus,
+  faRoad,
+  faPaste
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import MapView, { Marker, Region } from "react-native-maps";
@@ -45,6 +48,7 @@ export const MarkerModalEdit: React.FC<MarkerModalEditProps> = ({
     longitude: markerData.longitud
   });
   const [mapRegion, setMapRegion] = useState<Region | undefined>(undefined);
+  const [googleMapsLink, setGoogleMapsLink] = useState("");
   const mapRef = useRef<MapView>(null);
 
   useEffect(() => {
@@ -59,16 +63,61 @@ export const MarkerModalEdit: React.FC<MarkerModalEditProps> = ({
       latitude: markerData.latitud,
       longitude: markerData.longitud,
       latitudeDelta: 0.01,
-      longitudeDelta: 0.01,
+      longitudeDelta: 0.01
     });
   }, [markerData]);
 
-  const handleUbication  = () => {
+  // Función para extraer la latitud y longitud del enlace de Google Maps
+  const extractLatLongFromGoogleMapsLink = (link: string) => {
+    const regex = /@(-?\d+\.?\d*),(-?\d+\.?\d*)/; // Expresión regular para encontrar latitud y longitud
+    const match = link.match(regex);
+    if (match && match.length === 3) {
+      const latitude = parseFloat(match[1]);
+      const longitude = parseFloat(match[2]);
+      return { latitude, longitude };
+    }
+    return null;
+  };
+
+  // Función para manejar el cambio en el enlace de Google Maps
+  const handleGoogleMapsLinkChange = (text: string) => {
+    setGoogleMapsLink(text);
+
+    // Verificar si la URL contiene la cadena específica de Google Maps
+    if (text.includes("/maps/search/") || text.includes("@")) {
+      // Realizar otras comprobaciones necesarias
+      const location = extractLatLongFromGoogleMapsLink(text);
+      if (location) {
+        setMarkerLocation(location);
+        setMapRegion({
+          ...location,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01
+        });
+      }
+    } else {
+      // La URL no es válida, realizar la acción correspondiente (ignorarla o mostrar un mensaje de error)
+      // Por ejemplo, podrías mostrar un mensaje de error o limpiar el enlace
+      console.log("La URL de Google Maps no es válida");
+      // También puedes limpiar el enlace si prefieres ignorarlo
+      // setGoogleMapsLink("");
+    }
+  };
+  // Función para pegar desde el portapapeles
+  const handlePasteGoogleMapsLink = async () => {
+    const clipboardContent = await Clipboard.getString();
+    // Lógica para determinar en qué input pegar el contenido del portapapeles
+    // Por ejemplo, si quieres pegar en el input de la url:
+    setGoogleMapsLink(clipboardContent);
+    handleGoogleMapsLinkChange(clipboardContent);
+  };
+
+  const handleUbication = () => {
     if (mapRegion) {
       const newRegion = {
         ...mapRegion,
-        latitudeDelta: mapRegion.latitudeDelta  *2,
-        longitudeDelta: mapRegion.longitudeDelta*2 ,
+        latitudeDelta: mapRegion.latitudeDelta * 2,
+        longitudeDelta: mapRegion.longitudeDelta * 2
       };
       setMapRegion(newRegion);
     }
@@ -83,11 +132,11 @@ export const MarkerModalEdit: React.FC<MarkerModalEditProps> = ({
           mapRef.current.animateCamera({ zoom: newZoom });
         }
       } catch (error) {
-        console.error("Error al obtener la cámara:", error );
+        console.error("Error al obtener la cámara:", error);
       }
     }
   };
-  
+
   const handleZoomOut = async () => {
     if (mapRef.current) {
       try {
@@ -97,16 +146,15 @@ export const MarkerModalEdit: React.FC<MarkerModalEditProps> = ({
           mapRef.current.animateCamera({ zoom: newZoom });
         }
       } catch (error) {
-        console.error("Error al obtener la cámara:", error );
+        console.error("Error al obtener la cámara:", error);
       }
     }
   };
-  
-   
+
   const guardar = async () => {
     if (markerData) {
       try {
-        setLoading(true); 
+        setLoading(true);
         console.log(markerData);
         const { data } = await apiAxios.put(`/repartos/cliente`, {
           codCliente: +markerData.codCliente,
@@ -119,8 +167,8 @@ export const MarkerModalEdit: React.FC<MarkerModalEditProps> = ({
         onClose();
       } catch (error: any) {
         console.error("Error al realizar la consulta:", error.message);
-      }finally {
-        setLoading(false);  
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -160,8 +208,9 @@ export const MarkerModalEdit: React.FC<MarkerModalEditProps> = ({
 
                       {/* Inputs para dirección y teléfono */}
                       <View style={modalStyles.inputContainer}>
-                      <FontAwesomeIcon style={{margin:5}}
-                          icon={faMapMarkerAlt}
+                        <FontAwesomeIcon
+                          style={{ margin: 5 }}
+                          icon={faRoad}
                           size={20}
                           color={THEME_COLOR}
                         />
@@ -171,27 +220,61 @@ export const MarkerModalEdit: React.FC<MarkerModalEditProps> = ({
                           value={direccion}
                           onChangeText={(text) => setDireccion(text)}
                         />
-                      
                       </View>
 
                       <View style={modalStyles.inputContainer}>
-                      
-                        <FontAwesomeIcon style={{margin:5}}
+                        <FontAwesomeIcon
+                          style={{ margin: 5 }}
                           icon={faPhone}
                           size={20}
                           color={THEME_COLOR}
                         />
-                          <TextInput
+                        <TextInput
                           style={modalStyles.inputEd}
                           placeholder="Teléfono"
                           value={telefono}
                           onChangeText={(text) => setTelefono(text)}
                         />
                       </View>
+
+                      <View style={modalStyles.inputContainer}>
+                        <FontAwesomeIcon
+                          style={{ margin: 5 }}
+                          icon={faMapMarkerAlt}
+                          size={20}
+                          color={THEME_COLOR}
+                        />
+                        <TextInput
+                          style={modalStyles.inputEd}
+                          placeholder="Enlace de Google Maps"
+                          value={googleMapsLink}
+                          onChangeText={handleGoogleMapsLinkChange}
+                        />
+                        {/* Botón para pegar desde el portapapeles */}
+                        <TouchableOpacity
+                          onPress={handlePasteGoogleMapsLink}
+                          style={{
+                            borderWidth: 1,
+                            borderColor: THEME_COLOR,
+                            borderRadius: 5,
+                            padding: 8,
+                            margin: 5
+                          }}
+                        >
+                          <Text style={{ color: THEME_COLOR }}>
+                            <FontAwesomeIcon
+                              style={{ margin: 5 }}
+                              icon={faPaste} // Icono de "Pegar"
+                              size={20}
+                              color={THEME_COLOR}
+                            />
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
                     </View>
                     {/* Mapa para modificar cliente */}
                     <View style={{ flex: 1 }}>
-                    <MapView
+                      <MapView
                         ref={mapRef}
                         style={modalStyles.map}
                         region={mapRegion}
@@ -200,7 +283,7 @@ export const MarkerModalEdit: React.FC<MarkerModalEditProps> = ({
                         }
                         showsUserLocation={true}
                       >
-                         <Marker
+                        <Marker
                           coordinate={markerLocation}
                           draggable
                           onDragEnd={(event) =>
@@ -320,13 +403,13 @@ export const modalStyles = StyleSheet.create({
     position: "absolute",
     top: 10,
     left: 10,
-    flexDirection: "column",
+    flexDirection: "column"
   },
   zoomButton: {
     backgroundColor: "white",
     borderRadius: 30,
     padding: 10,
-    marginBottom: 5,
+    marginBottom: 5
   },
   keyboardButton: {
     position: "absolute",

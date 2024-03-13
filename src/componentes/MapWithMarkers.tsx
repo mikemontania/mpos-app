@@ -5,8 +5,7 @@ import { CustomCallout } from "./CustomCallout";
 import { FloatingDetailsButton } from "./FloatingDetailsButton";
 import { MarkerModalDetails } from "./MarkerModalDetalis";
 import { 
-  faCrosshairs,
-  faSearchPlus,
+  faCrosshairs, 
   faSync
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
