@@ -9,11 +9,12 @@ import {
   TextInput,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
-  Keyboard,
-  Clipboard
+  Keyboard, 
 } from "react-native";
 import { THEME_COLOR } from "../theme/theme";
 import apiAxios from "../api/axios";
+import Clipboard from '@react-native-clipboard/clipboard';
+
 import { Marcador } from "../screens/DetalleRepartoScreen";
 import {
   faTimes,
@@ -26,7 +27,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import MapView, { Marker, Region } from "react-native-maps";
-
+import axios from "../api/axios";
+interface Coordenadas {latitude:number, longitude:number}
 interface MarkerModalEditProps {
   isVisible: boolean;
   onClose: () => void;
@@ -68,39 +70,90 @@ export const MarkerModalEdit: React.FC<MarkerModalEditProps> = ({
   }, [markerData]);
 
   // Función para extraer la latitud y longitud del enlace de Google Maps
-  const extractLatLongFromGoogleMapsLink = (link: string) => {
-    const regex = /@(-?\d+\.?\d*),(-?\d+\.?\d*)/; // Expresión regular para encontrar latitud y longitud
-    const match = link.match(regex);
-    if (match && match.length === 3) {
-      const latitude = parseFloat(match[1]);
-      const longitude = parseFloat(match[2]);
-      return { latitude, longitude };
-    }
-    return null;
-  };
+  const validarURLyObtenerCoordenadas = async (url: string) => {
+    console.log("URL recibida:", url);
 
+    // Expresión regular para capturar las coordenadas de una URL de Google Maps
+    const regexMapsURL = /^https?:\/\/.*?[?&](?:q|sll)=(-?\d+\.\d+),(-?\d+\.\d+)/;
+    // Intentamos hacer coincidir la cadena con la expresión regular y extraer las coordenadas
+    const match = url.match(regexMapsURL);
+
+    if (match) {
+        console.log("Coincidencia encontrada:", match);
+
+        // Las coordenadas están en el índice 1 y 2 del array de coincidencias
+        const latitud = parseFloat(match[1]);
+        const longitud = parseFloat(match[2]);
+        console.log("Latitud:", latitud);
+        console.log("Longitud:", longitud);
+
+        // Validamos las coordenadas
+        if (!isNaN(latitud) && !isNaN(longitud)) {
+            return { latitude: latitud, longitude: longitud };
+        } else {
+            // Coordenadas inválidas
+            console.error("Las coordenadas extraídas no son válidas.");
+            return null;
+        }
+    } else {
+        try {
+            const response = await axios.get(url);
+            const html = response.data;
+            const coordenadas = extraerCoordenadas(html);
+            if (coordenadas) {
+                // Aquí puedes procesar las coordenadas como desees
+                console.log("Coordenadas extraídas del HTML:", coordenadas);
+                return coordenadas;
+            } else {
+                console.log("No se encontraron coordenadas en el HTML.");
+                return null;
+            }
+        } catch (error) {
+            console.error("Error al realizar la solicitud GET:", error);
+            console.error("La cadena no contiene coordenadas válidas.");
+            return null;
+        }
+    }
+};
+ 
+
+// Función para extraer las coordenadas del objeto APP_INITIALIZATION_STATE del HTML
+const extraerCoordenadas = (html:string) => {
+ 
+  const regexCoordenadas = /window\.APP_INITIALIZATION_STATE=(\[.*?\]);/s;
+  const match = html.match(regexCoordenadas);
+  
+  if (match) {
+    try {
+      const coordenadas = JSON.parse(match[1]);
+      // Aquí puedes procesar las coordenadas como desees
+      console.log("Coordenadas extraídas del HTML:", coordenadas);
+      // Por ejemplo, si las coordenadas están en un formato específico dentro del objeto coordenadas
+
+      return { latitude:coordenadas[0][0][2], longitude:coordenadas[0][0][1] };
+    } catch (error) {
+      console.error("Error al analizar las coordenadas:", error);
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
   // Función para manejar el cambio en el enlace de Google Maps
-  const handleGoogleMapsLinkChange = (text: string) => {
+  const handleGoogleMapsLinkChange = async (text: string) => {
     setGoogleMapsLink(text);
 
     // Verificar si la URL contiene la cadena específica de Google Maps
-    if (text.includes("/maps/search/") || text.includes("@")) {
-      // Realizar otras comprobaciones necesarias
-      const location = extractLatLongFromGoogleMapsLink(text);
-      if (location) {
-        setMarkerLocation(location);
-        setMapRegion({
-          ...location,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01
-        });
-      }
-    } else {
-      // La URL no es válida, realizar la acción correspondiente (ignorarla o mostrar un mensaje de error)
-      // Por ejemplo, podrías mostrar un mensaje de error o limpiar el enlace
-      console.log("La URL de Google Maps no es válida");
-      // También puedes limpiar el enlace si prefieres ignorarlo
-      // setGoogleMapsLink("");
+
+    // Realizar otras comprobaciones necesarias
+    const location = await validarURLyObtenerCoordenadas(text);
+    if (location) {
+      setMarkerLocation(location);
+      setMapRegion({
+        ...location,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01
+      });
     }
   };
   // Función para pegar desde el portapapeles
